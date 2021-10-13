@@ -67,12 +67,13 @@ void setup() {
 
 void loop() {
   printf("test\n");
-  delayMicroseconds(2);
+  /*delayMicroseconds(2);
   //if higher speed is desired, just call tx_on_PB5 directly
   tx_on_PB5('t');
   tx_on_PB5('e');
   tx_on_PB5('s');
   tx_on_PB5('t');
-  tx_on_PB5('\n');
-  delayMicroseconds(2);
+  tx_on_PB5('\n');*/
+  
+  delay(100);
 }
