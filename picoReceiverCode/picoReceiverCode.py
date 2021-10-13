@@ -50,6 +50,7 @@ sm = StateMachine(0, uart_rx, freq=8 * UART_BAUD, in_base=PIO_RX_PIN, jmp_pin=PI
 sm.irq(handler)
 sm.active(1)
 
+ONBOARD_LED_PIN.value(1)
 timestampInterval = 10
 startTime = time.ticks_ms()
 prevTime = startTime-timestampInterval
@@ -58,5 +59,6 @@ while True:
     recvTime = time.ticks_ms()
     if ((recvTime-prevTime)>=timestampInterval):
         print('\n['+str(recvTime-startTime)+']', end="")
+        ONBOARD_LED_PIN.toggle()
     prevTime = recvTime    
     print(recvChar, end="")
