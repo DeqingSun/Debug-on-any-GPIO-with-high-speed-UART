@@ -20,7 +20,7 @@ The method does not need to use any peripheral or interrupts. And it only takes 
 
 Here is a code sample on Arduino Uno (ATmega328P). The baud rate is 5333333 with a 16M CPU clock, and it takes less than 3us to send a byte.  
 
-![signal on logic analyzer](https://raw.githubusercontent.com/DeqingSun/Debug-on-any-GPIO-with-high-speed-UART/main/img/UnoSendTest.png)
+![signal on logic analyzer](img/UnoSendTest.png)
 
 And the code to generate the UART signal.
 
@@ -89,7 +89,7 @@ We can use a logic analyzer or a high-speed UART receiver to read the output fro
 
 Using a logic analyzer is pretty straightforward. Just hook up the output pin to the logic analyzer, and we can capture the signal. And we can see when the data got sent, and we can also see the data if the logic analyzer supports protocol decoding. 
 
-![signal on logic analyzer](https://raw.githubusercontent.com/DeqingSun/Debug-on-any-GPIO-with-high-speed-UART/main/img/UnoSendTest.png)
+![signal on logic analyzer](img/UnoSendTest.png)
 
 ### High-speed UART receiver  
 
@@ -101,15 +101,21 @@ Here I used a Raspberry Pi Pico (RP2040) to do the receiving job. The whole boar
 
 I used Micropython to write the [receiving code](https://github.com/DeqingSun/Debug-on-any-GPIO-with-high-speed-UART/blob/main/picoReceiverCode/picoReceiverCode.py). The Pico board will set a GPIO with proper PIO code to receive the UART signal. And once the signal is received, it will forward the data to the USB serial port with timestamps. So any serial monitor will work with the Pico board. The baud rate is hard-coded, but modifying a python script is much easier than compiling a C program.
  
-![connect Uno to Pico](https://raw.githubusercontent.com/DeqingSun/Debug-on-any-GPIO-with-high-speed-UART/main/img/photo_uno_and_pico.jpg)
+![connect Uno to Pico](img/photo_uno_and_pico.jpg)
 
 And here I had an Arduino Uno compatible board connected to Pico with an SCN connector jumper wire. The SCN connector is quite handy for temporary connections in pin header holes. The ground wire is not connected because the two boards are connected to the same USB hub. 
 
-![serial and logic analyzer](https://raw.githubusercontent.com/DeqingSun/Debug-on-any-GPIO-with-high-speed-UART/main/img/data_logic_analyzer_pico.png)
+![serial and logic analyzer](img/data_logic_analyzer_pico.png)
 
 The Pico board can receive the data at high speed and forward the data to the USB serial port. The serial monitor acts as a great addition to the logic analyzer for large amounts of data.
 
 ## Debug over LED
 
-TBD: using an LED on the target board to send debug info. And pick up the info with a sensor.
+I bought off-the-shelf parts to validate the LED. TPS54360 to generate +-5V, OPA847 to amplify the S5972 photodiode. In the feedback loop of OPA847, I used a 51K resistor and a 3pF capacitor (may not be the best).
+
+![photo of sensor](img/sensor_photo.jpg)
+
+The result is not quite satisfying. Maybe the LED does not switch fast enough, maybe my receiving circuit is not tuned well. 
+
+![waveform of sensor](img/waveform_light_sensor.png)
 
