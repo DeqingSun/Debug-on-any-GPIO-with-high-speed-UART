@@ -156,6 +156,8 @@ void tx_on_PA4(char c) {
 
 ESP32P4
 
+#include "soc/gpio_reg.h"
+
 void IRAM_ATTR tx_on_gpio5_branchless(uint8_t c)
 {
     //sending data at 4Mbps
