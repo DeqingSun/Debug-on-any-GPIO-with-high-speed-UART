@@ -153,3 +153,114 @@ void tx_on_PA4(char c) {
     PFIC->IENR[0] = (irq_status << 8);
     PFIC->IENR[1] = (irq_status >> 24);
 }
+
+ESP32P4
+
+void IRAM_ATTR tx_on_gpio5_branchless(uint8_t c)
+{
+    //sending data at 4Mbps
+    uint32_t irq_mask = esp_cpu_intr_get_enabled_mask();
+    esp_cpu_intr_disable(irq_mask);
+
+    volatile uint32_t *gpio_out = (volatile uint32_t *)GPIO_OUT_REG;
+    uint32_t ch = c;
+
+    asm volatile(
+        ".option push                       \n"
+        ".option norvc                      \n"   // keep instruction width predictable
+
+        // t0 = current GPIO output word
+        "lw     t0, 0(%[outreg])            \n"
+
+        // t1 = base word with GPIO5 forced low
+        "li     t2, %[mask]                 \n"
+        "not    t3, t2                      \n"
+        "and    t1, t0, t3                  \n"
+
+        // t5 = shift amount (5)
+        "li     t5, %[gpio]                 \n"
+
+        // start bit = 0
+        "sw     t1, 0(%[outreg])            \n"
+
+        // bit 0
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 0)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 1
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 1)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 2
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 2)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 3
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 3)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 4
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 4)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 5
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 5)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 6
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 6)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // bit 7
+        "add    zero, zero, zero            \n"
+        "andi   t4, %[ch], (1 << 7)         \n"
+        "sltu   t4, zero, t4                \n"
+        "sll    t4, t4, t5                  \n"
+        "or     t6, t1, t4                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        // stop bit = 1
+        "add    zero, zero, zero            \n"
+        "or     t6, t1, t2                  \n"
+        "sw     t6, 0(%[outreg])            \n"
+
+        ".option pop                        \n"
+        :
+        : [outreg] "r" (gpio_out),
+          [ch]     "r" (ch),
+          [mask]   "i" (1<<5),
+          [gpio]   "i" (5)
+        : "t0", "t1", "t2", "t3", "t4", "t5", "t6", "memory"
+    );
+
+    esp_cpu_intr_enable(irq_mask);
+}
+
